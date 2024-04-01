@@ -26,7 +26,9 @@ npx add-test-ids
 ```
 
 This will ask you for two questions: 
+
 ``` Please enter a directory path: src ```
+
 ``` Please enter file extensions, separated by commas: .tsx, .jsx ```
 
 ## Example result
@@ -44,6 +46,7 @@ This will ask you for two questions:
 ```
 
 This package will add `data-testId` in the following `MUI` components:
+
 ``` javascript
  const  muiElements  = [
 
