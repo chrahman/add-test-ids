@@ -1,0 +1,16 @@
+{
+  "name": "add-test-ids",
+  "version": "1.0.2",
+  "description": "Add test ids to your react components",
+  "main": "index.js",
+  "bin": {
+    "add-test-ids": "./index.js"
+  },
+  "scripts": {
+    "add-test-ids": "add-test-ids",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
