@@ -1,118 +1,164 @@
 #!/usr/bin/env node
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-
-// Array of MUI v4 elements
+// Array of MUI v4 & v5 components
 const muiElements = [
-  'AppBar',
-  'Avatar',
-  'Backdrop',
-  'Badge',
-  'BottomNavigation',
-  'BottomNavigationAction',
-  'Box',
-  'Button',
-  'ButtonBase',
-  'ButtonGroup',
-  'Card',
-  'CardActionArea',
-  'CardActions',
-  'CardContent',
-  'CardHeader',
-  'CardMedia',
-  'Checkbox',
-  'Chip',
-  'CircularProgress',
-  'ClickAwayListener',
-  'Collapse',
-  'Container',
-  'CssBaseline',
-  'Dialog',
-  'DialogActions',
-  'DialogContent',
-  'DialogContentText',
-  'DialogTitle',
-  'Divider',
-  'Drawer',
-  'ExpansionPanel',
-  'ExpansionPanelActions',
-  'ExpansionPanelDetails',
-  'ExpansionPanelSummary',
-  'Fab',
-  'Fade',
-  'FilledInput',
-  'FormControl',
-  'FormControlLabel',
-  'FormGroup',
-  'FormHelperText',
-  'FormLabel',
-  'Grid',
-  'GridList',
-  'GridListTile',
-  'GridListTileBar',
-  'Hidden',
-  'Icon',
-  'IconButton',
-  'Input',
-  'InputLabel',
-  'LinearProgress',
-  'Link',
-  'List',
-  'ListItem',
-  'ListItemAvatar',
-  'ListItemIcon',
-  'ListItemSecondaryAction',
-  'ListItemText',
-  'ListSubheader',
-  'Menu',
-  'MenuItem',
-  'MenuList',
-  'MobileStepper',
-  'Modal',
-  'NativeSelect',
-  'OutlinedInput',
-  'Pagination',
-  'PaginationItem',
-  'Paper',
-  'Popover',
-  'Popper',
-  'Portal',
-  'Radio',
-  'RadioGroup',
-  'RootRef',
-  'Select',
-  'Slide',
-  'Slider',
-  'Snackbar',
-  'SnackbarContent',
-  'Step',
-  'StepButton',
-  'StepConnector',
-  'StepContent',
-  'StepIcon',
-  'StepLabel',
-  'Stepper',
-  'SvgIcon',
-  'SwipeableDrawer',
-  'Switch',
-  'Tab',
-  'Table',
-  'TableBody',
-  'TableCell',
-  'TableContainer',
-  'TableFooter',
-  'TableHead',
-  'TablePagination',
-  'TableRow',
-  'TableSortLabel',
-  'Tabs',
-  'TextField',
-  'TextareaAutosize',
-  'Toolbar',
-  'Tooltip',
-  'Typography',
+  "AppBar",
+  "Avatar",
+  "Backdrop",
+  "Badge",
+  "BottomNavigation",
+  "BottomNavigationAction",
+  "Box",
+  "Button",
+  "ButtonBase",
+  "ButtonGroup",
+  "Card",
+  "CardActionArea",
+  "CardActions",
+  "CardContent",
+  "CardHeader",
+  "CardMedia",
+  "Checkbox",
+  "Chip",
+  "CircularProgress",
+  "ClickAwayListener",
+  "Collapse",
+  "Container",
+  "CssBaseline",
+  "Dialog",
+  "DialogActions",
+  "DialogContent",
+  "DialogContentText",
+  "DialogTitle",
+  "Divider",
+  "Drawer",
+  "ExpansionPanel",
+  "ExpansionPanelActions",
+  "ExpansionPanelDetails",
+  "ExpansionPanelSummary",
+  "Fab",
+  "Fade",
+  "FilledInput",
+  "FormControl",
+  "FormControlLabel",
+  "FormGroup",
+  "FormHelperText",
+  "FormLabel",
+  "Grid",
+  "GridList",
+  "GridListTile",
+  "GridListTileBar",
+  "Hidden",
+  "Icon",
+  "IconButton",
+  "Input",
+  "InputLabel",
+  "LinearProgress",
+  "Link",
+  "List",
+  "ListItem",
+  "ListItemAvatar",
+  "ListItemIcon",
+  "ListItemSecondaryAction",
+  "ListItemText",
+  "ListSubheader",
+  "Menu",
+  "MenuItem",
+  "MenuList",
+  "MobileStepper",
+  "Modal",
+  "NativeSelect",
+  "OutlinedInput",
+  "Pagination",
+  "PaginationItem",
+  "Paper",
+  "Popover",
+  "Popper",
+  "Portal",
+  "Radio",
+  "RadioGroup",
+  "RootRef",
+  "Select",
+  "Slide",
+  "Slider",
+  "Snackbar",
+  "SnackbarContent",
+  "Step",
+  "StepButton",
+  "StepConnector",
+  "StepContent",
+  "StepIcon",
+  "StepLabel",
+  "Stepper",
+  "SvgIcon",
+  "SwipeableDrawer",
+  "Switch",
+  "Tab",
+  "Table",
+  "TableBody",
+  "TableCell",
+  "TableContainer",
+  "TableFooter",
+  "TableHead",
+  "TablePagination",
+  "TableRow",
+  "TableSortLabel",
+  "Tabs",
+  "TextField",
+  "TextareaAutosize",
+  "Toolbar",
+  "Tooltip",
+  "Typography",
+  "Accordion",
+  "AccordionActions",
+  "AccordionDetails",
+  "AccordionSummary",
+  "Alert",
+  "AlertTitle",
+  "Autocomplete",
+  "AvatarGroup",
+  "BackdropUnstyled",
+  "BadgeUnstyled",
+  "ButtonUnstyled",
+  "Calendar",
+  "Clock",
+  "DatePicker",
+  "DateTimePicker",
+  "DayPicker",
+  "DesktopDatePicker",
+  "DesktopDateTimePicker",
+  "DesktopTimePicker",
+  "LoadingButton",
+  "MobileDatePicker",
+  "MobileDateTimePicker",
+  "MobileTimePicker",
+  "MonthPicker",
+  "PickersDay",
+  "Skeleton",
+  "SliderUnstyled",
+  "StaticDatePicker",
+  "StaticDateTimePicker",
+  "StaticTimePicker",
+  "SwitchUnstyled",
+  "TabContext",
+  "TabList",
+  "TabPanel",
+  "TimePicker",
+  "Timeline",
+  "TimelineConnector",
+  "TimelineContent",
+  "TimelineDot",
+  "TimelineItem",
+  "TimelineOppositeContent",
+  "TimelineSeparator",
+  "ToggleButton",
+  "ToggleButtonGroup",
+  "TreeItem",
+  "TreeView",
+  "YearPicker",
 ];
 
 function hashString(str) {
@@ -129,93 +175,102 @@ function addTestIDs(sourceCode, fileName) {
   let updatedCode = sourceCode;
   let hashedId = hashString(fileName);
 
-  // Iterate over each MUI element and add data-testid attribute
-  muiElements.forEach((element, index) => {
+  // Iterate over each MUI element and add data-testId attribute
+  muiElements.forEach((element) => {
     // unique id with multiplying Math.random() to avoid collision
-    let uniqueId = hashedId.toString(36).substring(2, 5) + '-' + Math.random().toString(36).substring(2, 5);
-    const regex = new RegExp(`<${element}(\\s|>)`, 'g');
-    updatedCode = updatedCode.replace(regex, `<${element} data-testId="${uniqueId}"$1`);
+    let uniqueId =
+      hashedId.toString(36).substring(2, 5) +
+      "-" +
+      Math.random().toString(36).substring(2, 5);
+    /*This ensures that the data-testId attribute is added correctly even
+      if the element already has other attributes. The \\b word boundary 
+      ensures that the element name is matched exactly, preventing partial
+      matches.*/
+    const regex = new RegExp(`(<${element}\\b[^>]*)(>)`, "g");
+
+    updatedCode = updatedCode.replace(
+      regex,
+      `<${element} data-testId="${uniqueId}"$1`
+    );
   });
 
   return updatedCode;
 }
 
 // Function to process a single file
-function processFile(filePath) {
-  // Read the source code file
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+async function processFile(filePath) {
+  try {
+    // Read the source code file
+    const data = await fs.readFile(filePath, "utf8");
+    if (data) {
+      // Update the source code with data-testId attributes
+      const updatedCode = addTestIDs(data, path.basename(filePath));
 
-    // Update the source code with data-testid attributes
-    const updatedCode = addTestIDs(data, path.basename(filePath));
-
-    // Write the updated code back to the file
-    fs.writeFile(filePath, updatedCode, 'utf8', (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
+      // Write the updated code back to the file
+      await fs.writeFile(filePath, updatedCode, "utf8");
 
       console.log(`Test IDs added successfully to ${filePath}`);
-    });
-  });
+    } else {
+      console.log(`No data found in file ${filePath}`);
+    }
+  } catch (err) {
+    console.error(`Error processing file ${filePath}:`, err);
+  }
 }
 
 // Function to process all files in a directory (including nested directories)
-function processDirectory(dirPath, fileExtensions) {
-  // Read all files in the directory
-  fs.readdir(dirPath, (err, files) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+async function processDirectory(dirPath, fileExtensions) {
+  try {
+    // Read all files in the directory
+    const files = await fs.readdir(dirPath);
 
     // Process each file
-    files.forEach((file) => {
-      const filePath = path.join(dirPath, file);
+    if (files.length > 0) {
+      const fileProcessingPromises = files.map(async (file) => {
+        const filePath = path.join(dirPath, file);
 
-      // Check if the file is a directory
-      fs.stat(filePath, (err, stats) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
+        // Check if the file is a directory
+        const stats = await fs.stat(filePath);
 
         if (stats.isDirectory()) {
           // Recursively process the directory
-          processDirectory(filePath, fileExtensions);
+          return processDirectory(filePath, fileExtensions);
         } else if (fileExtensions.includes(path.extname(filePath))) {
           // Process only .tsx files
-          processFile(filePath);
+          return processFile(filePath);
         }
       });
-    });
-  });
+
+      await Promise.all(fileProcessingPromises);
+    } else {
+      console.log("No files found in the directory");
+    }
+  } catch (err) {
+    console.error(`Error processing directory ${dirPath}:`, err);
+  }
 }
 
 // // Start processing the src directory
 // const srcPath = 'src'; // Adjust the path as needed
 // processDirectory(srcPath);
 
-
-
 function main() {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
-  rl.question('Please enter a directory path: ', (dirPath) => {
-    rl.question('Please enter file extensions, separated by commas: ', (fileExtensions) => {
-      fileExtensions = fileExtensions.split(',').map(ext => ext.trim());
-      // Start processing the provided directory
-      processDirectory(dirPath, fileExtensions);
+  rl.question("Please enter a directory path: ", (dirPath) => {
+    rl.question(
+      "Please enter file extensions, separated by commas: ",
+      (fileExtensions) => {
+        fileExtensions = fileExtensions.split(",").map((ext) => ext.trim());
+        // Start processing the provided directory
+        processDirectory(dirPath, fileExtensions);
 
-      rl.close();
-    });
+        rl.close();
+      }
+    );
   });
 }
 
