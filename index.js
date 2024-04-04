@@ -1,118 +1,117 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+const fs = require("fs");
+const path = require("path");
+const readline = require("readline");
 
 // Array of MUI v4 elements
 const muiElements = [
-  'AppBar',
-  'Avatar',
-  'Backdrop',
-  'Badge',
-  'BottomNavigation',
-  'BottomNavigationAction',
-  'Box',
-  'Button',
-  'ButtonBase',
-  'ButtonGroup',
-  'Card',
-  'CardActionArea',
-  'CardActions',
-  'CardContent',
-  'CardHeader',
-  'CardMedia',
-  'Checkbox',
-  'Chip',
-  'CircularProgress',
-  'ClickAwayListener',
-  'Collapse',
-  'Container',
-  'CssBaseline',
-  'Dialog',
-  'DialogActions',
-  'DialogContent',
-  'DialogContentText',
-  'DialogTitle',
-  'Divider',
-  'Drawer',
-  'ExpansionPanel',
-  'ExpansionPanelActions',
-  'ExpansionPanelDetails',
-  'ExpansionPanelSummary',
-  'Fab',
-  'Fade',
-  'FilledInput',
-  'FormControl',
-  'FormControlLabel',
-  'FormGroup',
-  'FormHelperText',
-  'FormLabel',
-  'Grid',
-  'GridList',
-  'GridListTile',
-  'GridListTileBar',
-  'Hidden',
-  'Icon',
-  'IconButton',
-  'Input',
-  'InputLabel',
-  'LinearProgress',
-  'Link',
-  'List',
-  'ListItem',
-  'ListItemAvatar',
-  'ListItemIcon',
-  'ListItemSecondaryAction',
-  'ListItemText',
-  'ListSubheader',
-  'Menu',
-  'MenuItem',
-  'MenuList',
-  'MobileStepper',
-  'Modal',
-  'NativeSelect',
-  'OutlinedInput',
-  'Pagination',
-  'PaginationItem',
-  'Paper',
-  'Popover',
-  'Popper',
-  'Portal',
-  'Radio',
-  'RadioGroup',
-  'RootRef',
-  'Select',
-  'Slide',
-  'Slider',
-  'Snackbar',
-  'SnackbarContent',
-  'Step',
-  'StepButton',
-  'StepConnector',
-  'StepContent',
-  'StepIcon',
-  'StepLabel',
-  'Stepper',
-  'SvgIcon',
-  'SwipeableDrawer',
-  'Switch',
-  'Tab',
-  'Table',
-  'TableBody',
-  'TableCell',
-  'TableContainer',
-  'TableFooter',
-  'TableHead',
-  'TablePagination',
-  'TableRow',
-  'TableSortLabel',
-  'Tabs',
-  'TextField',
-  'TextareaAutosize',
-  'Toolbar',
-  'Tooltip',
-  'Typography',
+  "AppBar",
+  "Avatar",
+  "Backdrop",
+  "Badge",
+  "BottomNavigation",
+  "BottomNavigationAction",
+  "Box",
+  "Button",
+  "ButtonBase",
+  "ButtonGroup",
+  "Card",
+  "CardActionArea",
+  "CardActions",
+  "CardContent",
+  "CardHeader",
+  "CardMedia",
+  "Checkbox",
+  "Chip",
+  "CircularProgress",
+  "ClickAwayListener",
+  "Collapse",
+  "Container",
+  "CssBaseline",
+  "Dialog",
+  "DialogActions",
+  "DialogContent",
+  "DialogContentText",
+  "DialogTitle",
+  "Divider",
+  "Drawer",
+  "ExpansionPanel",
+  "ExpansionPanelActions",
+  "ExpansionPanelDetails",
+  "ExpansionPanelSummary",
+  "Fab",
+  "Fade",
+  "FilledInput",
+  "FormControl",
+  "FormControlLabel",
+  "FormGroup",
+  "FormHelperText",
+  "FormLabel",
+  "Grid",
+  "GridList",
+  "GridListTile",
+  "GridListTileBar",
+  "Hidden",
+  "Icon",
+  "IconButton",
+  "Input",
+  "InputLabel",
+  "LinearProgress",
+  "Link",
+  "List",
+  "ListItem",
+  "ListItemAvatar",
+  "ListItemIcon",
+  "ListItemSecondaryAction",
+  "ListItemText",
+  "ListSubheader",
+  "Menu",
+  "MenuItem",
+  "MenuList",
+  "MobileStepper",
+  "Modal",
+  "NativeSelect",
+  "OutlinedInput",
+  "Pagination",
+  "PaginationItem",
+  "Paper",
+  "Popover",
+  "Popper",
+  "Portal",
+  "Radio",
+  "RadioGroup",
+  "RootRef",
+  "Select",
+  "Slide",
+  "Snackbar",
+  "SnackbarContent",
+  "Step",
+  "StepButton",
+  "StepConnector",
+  "StepContent",
+  "StepIcon",
+  "StepLabel",
+  "Stepper",
+  "SvgIcon",
+  "SwipeableDrawer",
+  "Switch",
+  "Tab",
+  "Table",
+  "TableBody",
+  "TableCell",
+  "TableContainer",
+  "TableFooter",
+  "TableHead",
+  "TablePagination",
+  "TableRow",
+  "TableSortLabel",
+  "Tabs",
+  "TextField",
+  "TextareaAutosize",
+  "Toolbar",
+  "Tooltip",
+  "Typography",
 ];
 
 function hashString(str) {
@@ -127,23 +126,35 @@ function hashString(str) {
 // Function to add data-testId attribute
 function addTestIDs(sourceCode, fileName) {
   let updatedCode = sourceCode;
-  let hashedId = hashString(fileName);
 
   // Iterate over each MUI element and add data-testid attribute
   muiElements.forEach((element, index) => {
-    // unique id with multiplying Math.random() to avoid collision
-    let uniqueId = hashedId.toString(36).substring(2, 5) + '-' + Math.random().toString(36).substring(2, 5);
-    const regex = new RegExp(`<${element}(\\s|>)`, 'g');
-    updatedCode = updatedCode.replace(regex, `<${element} data-testId="${uniqueId}"$1`);
-  });
+    // Create a regex pattern to match the element & exclude element that have existing data-testId attributes
+    const regex = new RegExp(
+      `<${element}(?![^>]*data-testId)(?![^>]*"[^"]*>")(\\s|>)`,
+      "gs"
+    );
+    let lineNumber = 0;
+    let columnNumber = 0;
 
+    updatedCode = updatedCode.replace(regex, (match, p1, offset) => {
+      lineNumber = sourceCode.substring(0, offset).split("\n").length;
+      columnNumber = offset - sourceCode.lastIndexOf("\n", offset);
+      let hashedLineNumber = hashString(lineNumber.toString()).substring(0, 3);
+      let hashedColumnNumber = hashString(columnNumber.toString()).substring(
+        0,
+        3
+      );
+      return `<${element} data-testId="${hashedLineNumber}-${hashedColumnNumber}"${p1}`;
+    });
+  });
   return updatedCode;
 }
 
 // Function to process a single file
 function processFile(filePath) {
   // Read the source code file
-  fs.readFile(filePath, 'utf8', (err, data) => {
+  fs.readFile(filePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
       return;
@@ -153,7 +164,7 @@ function processFile(filePath) {
     const updatedCode = addTestIDs(data, path.basename(filePath));
 
     // Write the updated code back to the file
-    fs.writeFile(filePath, updatedCode, 'utf8', (err) => {
+    fs.writeFile(filePath, updatedCode, "utf8", (err) => {
       if (err) {
         console.error(err);
         return;
@@ -200,22 +211,23 @@ function processDirectory(dirPath, fileExtensions) {
 // const srcPath = 'src'; // Adjust the path as needed
 // processDirectory(srcPath);
 
-
-
 function main() {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
-  rl.question('Please enter a directory path: ', (dirPath) => {
-    rl.question('Please enter file extensions, separated by commas: ', (fileExtensions) => {
-      fileExtensions = fileExtensions.split(',').map(ext => ext.trim());
-      // Start processing the provided directory
-      processDirectory(dirPath, fileExtensions);
+  rl.question("Please enter a directory path: ", (dirPath) => {
+    rl.question(
+      "Please enter file extensions, separated by commas: ",
+      (fileExtensions) => {
+        fileExtensions = fileExtensions.split(",").map((ext) => ext.trim());
+        // Start processing the provided directory
+        processDirectory(dirPath, fileExtensions);
 
-      rl.close();
-    });
+        rl.close();
+      }
+    );
   });
 }
 
