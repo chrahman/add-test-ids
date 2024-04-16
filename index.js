@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 const readline = require("readline");
 
@@ -186,8 +186,10 @@ function addTestIDs(sourceCode, fileName) {
       if the element already has other attributes. The \\b word boundary 
       ensures that the element name is matched exactly, preventing partial
       matches.*/
-    const regex = new RegExp(`(<${element}\\b[^>]*)(>)`, "g");
-
+    const regex = new RegExp(
+      `<${element}(?![^>]*data-testId)(?![^>]*"[^"]*>")(\\s|>)`,
+      "gs"
+    );
     updatedCode = updatedCode.replace(
       regex,
       `<${element} data-testId="${uniqueId}"$1`
