@@ -182,10 +182,6 @@ function addTestIDs(sourceCode, fileName) {
       hashedId.toString(36).substring(2, 5) +
       "-" +
       Math.random().toString(36).substring(2, 5);
-    /*This ensures that the data-testId attribute is added correctly even
-      if the element already has other attributes. The \\b word boundary 
-      ensures that the element name is matched exactly, preventing partial
-      matches.*/
     const regex = new RegExp(
       `<${element}(?![^>]*data-testId)(?![^>]*"[^"]*>")(\\s|>)`,
       "gs"
@@ -194,6 +190,17 @@ function addTestIDs(sourceCode, fileName) {
       regex,
       `<${element} data-testId="${uniqueId}"$1`
     );
+
+    updatedCode = updatedCode.replace(regex, (match, p1, offset) => {
+      let lineNumber = sourceCode.substring(0, offset).split("\n").length;
+      let columnNumber = offset - sourceCode.lastIndexOf("\n", offset);
+      let hashedLineNumber = hashString(lineNumber.toString()).substring(0, 3);
+      let hashedColumnNumber = hashString(columnNumber.toString()).substring(
+        0,
+        3
+      );
+      return `<${element} data-testId="${hashedLineNumber}-${hashedColumnNumber}"${p1}`;
+    });
   });
 
   return updatedCode;
