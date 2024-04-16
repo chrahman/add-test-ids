@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 const readline = require("readline");
 
-// Array of MUI v4 elements
+// Array of MUI v4 & v5 components
 const muiElements = [
   "AppBar",
   "Avatar",
@@ -84,6 +83,7 @@ const muiElements = [
   "RootRef",
   "Select",
   "Slide",
+  "Slider",
   "Snackbar",
   "SnackbarContent",
   "Step",
@@ -112,6 +112,53 @@ const muiElements = [
   "Toolbar",
   "Tooltip",
   "Typography",
+  "Accordion",
+  "AccordionActions",
+  "AccordionDetails",
+  "AccordionSummary",
+  "Alert",
+  "AlertTitle",
+  "Autocomplete",
+  "AvatarGroup",
+  "BackdropUnstyled",
+  "BadgeUnstyled",
+  "ButtonUnstyled",
+  "Calendar",
+  "Clock",
+  "DatePicker",
+  "DateTimePicker",
+  "DayPicker",
+  "DesktopDatePicker",
+  "DesktopDateTimePicker",
+  "DesktopTimePicker",
+  "LoadingButton",
+  "MobileDatePicker",
+  "MobileDateTimePicker",
+  "MobileTimePicker",
+  "MonthPicker",
+  "PickersDay",
+  "Skeleton",
+  "SliderUnstyled",
+  "StaticDatePicker",
+  "StaticDateTimePicker",
+  "StaticTimePicker",
+  "SwitchUnstyled",
+  "TabContext",
+  "TabList",
+  "TabPanel",
+  "TimePicker",
+  "Timeline",
+  "TimelineConnector",
+  "TimelineContent",
+  "TimelineDot",
+  "TimelineItem",
+  "TimelineOppositeContent",
+  "TimelineSeparator",
+  "ToggleButton",
+  "ToggleButtonGroup",
+  "TreeItem",
+  "TreeView",
+  "YearPicker",
 ];
 
 function hashString(str) {
@@ -126,20 +173,27 @@ function hashString(str) {
 // Function to add data-testId attribute
 function addTestIDs(sourceCode, fileName) {
   let updatedCode = sourceCode;
+  let hashedId = hashString(fileName);
 
-  // Iterate over each MUI element and add data-testid attribute
-  muiElements.forEach((element, index) => {
-    // Create a regex pattern to match the element & exclude element that have existing data-testId attributes
+  // Iterate over each MUI element and add data-testId attribute
+  muiElements.forEach((element) => {
+    // unique id with multiplying Math.random() to avoid collision
+    let uniqueId =
+      hashedId.toString(36).substring(2, 5) +
+      "-" +
+      Math.random().toString(36).substring(2, 5);
     const regex = new RegExp(
       `<${element}(?![^>]*data-testId)(?![^>]*"[^"]*>")(\\s|>)`,
       "gs"
     );
-    let lineNumber = 0;
-    let columnNumber = 0;
+    updatedCode = updatedCode.replace(
+      regex,
+      `<${element} data-testId="${uniqueId}"$1`
+    );
 
     updatedCode = updatedCode.replace(regex, (match, p1, offset) => {
-      lineNumber = sourceCode.substring(0, offset).split("\n").length;
-      columnNumber = offset - sourceCode.lastIndexOf("\n", offset);
+      let lineNumber = sourceCode.substring(0, offset).split("\n").length;
+      let columnNumber = offset - sourceCode.lastIndexOf("\n", offset);
       let hashedLineNumber = hashString(lineNumber.toString()).substring(0, 3);
       let hashedColumnNumber = hashString(columnNumber.toString()).substring(
         0,
@@ -148,63 +202,61 @@ function addTestIDs(sourceCode, fileName) {
       return `<${element} data-testId="${hashedLineNumber}-${hashedColumnNumber}"${p1}`;
     });
   });
+
   return updatedCode;
 }
 
 // Function to process a single file
-function processFile(filePath) {
-  // Read the source code file
-  fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+async function processFile(filePath) {
+  try {
+    // Read the source code file
+    const data = await fs.readFile(filePath, "utf8");
+    if (data) {
+      // Update the source code with data-testId attributes
+      const updatedCode = addTestIDs(data, path.basename(filePath));
 
-    // Update the source code with data-testid attributes
-    const updatedCode = addTestIDs(data, path.basename(filePath));
-
-    // Write the updated code back to the file
-    fs.writeFile(filePath, updatedCode, "utf8", (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
+      // Write the updated code back to the file
+      await fs.writeFile(filePath, updatedCode, "utf8");
 
       console.log(`Test IDs added successfully to ${filePath}`);
-    });
-  });
+    } else {
+      console.log(`No data found in file ${filePath}`);
+    }
+  } catch (err) {
+    console.error(`Error processing file ${filePath}:`, err);
+  }
 }
 
 // Function to process all files in a directory (including nested directories)
-function processDirectory(dirPath, fileExtensions) {
-  // Read all files in the directory
-  fs.readdir(dirPath, (err, files) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
+async function processDirectory(dirPath, fileExtensions) {
+  try {
+    // Read all files in the directory
+    const files = await fs.readdir(dirPath);
 
     // Process each file
-    files.forEach((file) => {
-      const filePath = path.join(dirPath, file);
+    if (files.length > 0) {
+      const fileProcessingPromises = files.map(async (file) => {
+        const filePath = path.join(dirPath, file);
 
-      // Check if the file is a directory
-      fs.stat(filePath, (err, stats) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
+        // Check if the file is a directory
+        const stats = await fs.stat(filePath);
 
         if (stats.isDirectory()) {
           // Recursively process the directory
-          processDirectory(filePath, fileExtensions);
+          return processDirectory(filePath, fileExtensions);
         } else if (fileExtensions.includes(path.extname(filePath))) {
           // Process only .tsx files
-          processFile(filePath);
+          return processFile(filePath);
         }
       });
-    });
-  });
+
+      await Promise.all(fileProcessingPromises);
+    } else {
+      console.log("No files found in the directory");
+    }
+  } catch (err) {
+    console.error(`Error processing directory ${dirPath}:`, err);
+  }
 }
 
 // // Start processing the src directory
